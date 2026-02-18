@@ -19,6 +19,11 @@ This Power Automate flow automatically detects new calendar events on my OOO (ou
 
 ---
 
+## 📖 Setup Guide
+For step-by-step instructions on how to set up this flow, see [Setup Instructions](docs/instructions.md).
+
+---
+
 ## 1. Overview
 
 This flow performs the following steps:
@@ -63,8 +68,10 @@ The flow uses the **Office 365 Outlook** connector.
 
 ### 2.2 Condition: Skip Events You Organized
 * Check: organizer.email != your.email
-* Yes branch: Event is not yours → Respond to Event → Decline
-* No branch: Event is yours → Skip or optionally delete
+* Yes branch: Event is not yours → Respond to Event (Decline) + Delete Event (Parallel)
+* No branch: Event is yours → Skip
+
+> **Note:** The "Delete Event" action runs **in parallel** with "Respond to Event" because the event ID from the trigger becomes unavailable after responding. Running them in parallel ensures both actions can access the original event ID.
 
 
 ### 2.3 Action: Respond to Event (Decline)
@@ -94,7 +101,7 @@ The flow uses the **Office 365 Outlook** connector.
 * Sends a polite message to the organizer
 * `body/SendResponse: true` ensures the organizer sees the declined status
 
-### 2.4 Action: Delete Calendar Event (Optional)
+### 2.4 Action: Delete Calendar Event (Parallel with Respond)
 ```json
 {
     "inputs": {
@@ -111,7 +118,9 @@ The flow uses the **Office 365 Outlook** connector.
     },
     "metadata": {
             "operationMetadataId": "<OPERATION_METADATA_ID>"
-    }
+    },
+    "runAfter": {},
+    "type": "ApiConnection"
 }
 ```
 * Deletes the event from your calendar
